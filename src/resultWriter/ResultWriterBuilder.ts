@@ -14,13 +14,17 @@ export class ResultWriterBuilder{
     }
 
     public build : <D, T>(
-        type: "html-table" | "json"
+        type: "html-table" | "json" | "component-map" | "not-mapped"
     ) => IResultWriter<D, T> = (type) => {
         switch(type) {
             case "html-table":
-                return new ResultHTMLTableWriter(this.resultTargetDir);
+                return new ResultHTMLTableWriter(this.resultTargetDir, "HTMLTable.html");
+            case "component-map": 
+                return new ResultHTMLTableWriter(this.resultTargetDir, "ComponentMap.html");
+            case "not-mapped":
+                return new ResultHTMLTableWriter(this.resultTargetDir, "NotMapped.html");
             case "json":
-                return new ResultJsonWriter(this.resultTargetDataDir)
+                return new ResultJsonWriter(this.resultTargetDataDir);
             default: ((t: never) => {
                 throw `missing case for type $${t}`;
             })(type);

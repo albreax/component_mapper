@@ -13,17 +13,51 @@ const extensions = ["ts", "tsx", "md"];
 const resultPath = `./result`;
 const project = buildProjectAnalyze(projectPath, extensions);
 
-const componentMap = buildComponentMap(project.findings);
+const componentMap = buildComponentMap(project.findings).componentMap;
 
 const writerBuilder = new ResultWriterBuilder(resultPath);
-const htmlWriter = writerBuilder.build("html-table");
 const pathFix = (p: string) => p.replace(/^.+src/g, "src");
-htmlWriter.write(componentMap.componentMap, (d: typeof componentMap.componentMap) => {
+writerBuilder.build("html-table").write(componentMap, (d: typeof componentMap) => {
     return [["Pfad", "Komponente"]].concat(d.map(e => [pathFix(e.filepath), e.component]))
 });
 
-const jsonWriter = writerBuilder.build("json");
-jsonWriter.write(componentMap.componentMap, (d: typeof componentMap.componentMap) => d);
+writerBuilder.build("json").write(componentMap, (d: typeof componentMap) => d);
+
+const map = componentMap.reduce((prev, curr) => {
+    const elem = prev.find(e => e.component === curr.component);
+    if (elem) {
+        elem.pathList.push(curr.filepath);
+        return prev;
+    } else {
+        return [...prev, {component: curr.component, pathList: [curr.filepath]}]
+    }
+}, [] as {component: string, pathList: string []}[])
+.sort((a, b) => a.component > b.component ? 1 : -1);
+
+writerBuilder.build("component-map").write(map, (d: typeof map) => {
+    return [["Komponente", "Pfade"]].concat(d.map(e => [e.component, e.pathList.map(pathFix).join("<br>")]));
+});
+
+
+const notMapped = project.fileCollection.reduce((prev, curr) => {
+    if (curr.indexOf("stories") > -1 || curr.indexOf("scss") > -1) {
+        return prev;
+    }
+    const notMissed = componentMap.find(e => {
+        const fp = e.filepath.replace("*", "");
+        return curr.indexOf(fp) > -1 
+    });
+
+    if (notMissed) {
+        return prev;
+    } else {
+        return [...prev, curr];
+    }
+}, [] as string[] );
+
+writerBuilder.build("not-mapped").write(notMapped, (d: typeof notMapped) => {
+    return d.map(e => [e]);
+});
 
 // console.log(project.fileCollection)
 // console.log(componentMap)

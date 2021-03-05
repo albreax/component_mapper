@@ -1,5 +1,4 @@
 import {IResultWriter} from "./IResultWriter.ts";
-const fileName = "HTMLTable.html";
 
 const html = (tableContent: string) => (
     `<!DOCTYPE html>`+
@@ -30,19 +29,21 @@ const html = (tableContent: string) => (
 );
 
 export class ResultHTMLTableWriter<D, T extends  string[][]> implements IResultWriter<D, T> {
-    constructor(private resultTargetDir: string){}
+    constructor(private resultTargetDir: string, private fileName: string){}
     
     public write = (data: D, mapper: (data: D) => T) => {
         const mapped = mapper(data);
         const titleData = mapped.shift();
         
         const title = " <thead><tr>" +
+            "<th class=\"footable-sortable\">Zeile</th>" + 
             titleData?.map(cell => "<th class=\"footable-sortable\">" + cell + "</th>").join("\n")
         + "</tr></thead>";
 
         const content = "<tbody>" +
-            mapped.map(row => {
+            mapped.map((row, indx) => {
             return "<tr>" +
+                "<td>" + indx + "</td>" +
                 row.map(cell => "<td style=\"display: table-cell;\">" + cell + "</td>").join("\n")
             + "</tr>"
         }).join(("\n")) + "</tbody>";
@@ -52,7 +53,7 @@ export class ResultHTMLTableWriter<D, T extends  string[][]> implements IResultW
             content
         );
 
-        const path = this.resultTargetDir + "/" + fileName;
+        const path = this.resultTargetDir + "/" + this.fileName;
 
         Deno.writeTextFileSync(path, htmlData);
     };
