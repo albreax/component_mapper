@@ -53,7 +53,7 @@ export class ResultHTMLTableWriter<D, T extends  string[][]> implements IResultW
             content
         );
 
-        const path = this.resultTargetDir + "/" + this.fileName;
+        const path = this.resultTargetDir + "/" + this.fileName + ".html";
 
         Deno.writeTextFileSync(path, htmlData);
     };

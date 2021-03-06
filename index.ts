@@ -17,11 +17,11 @@ const componentMap = buildComponentMap(project.findings).componentMap;
 
 const writerBuilder = new ResultWriterBuilder(resultPath);
 const pathFix = (p: string) => p.replace(/^.+src/g, "src");
-writerBuilder.build("html-table").write(componentMap, (d: typeof componentMap) => {
+writerBuilder.build("html-table", "HTMLTable").write(componentMap, (d: typeof componentMap) => {
     return [["Pfad", "Komponente"]].concat(d.map(e => [pathFix(e.filepath), e.component]))
 });
 
-writerBuilder.build("json").write(componentMap, (d: typeof componentMap) => d);
+writerBuilder.build("json", "result").write(componentMap, (d: typeof componentMap) => d);
 
 const map = componentMap.reduce((prev, curr) => {
     const elem = prev.find(e => e.component === curr.component);
@@ -34,7 +34,7 @@ const map = componentMap.reduce((prev, curr) => {
 }, [] as {component: string, pathList: string []}[])
 .sort((a, b) => a.component > b.component ? 1 : -1);
 
-writerBuilder.build("component-map").write(map, (d: typeof map) => {
+writerBuilder.build("html-table", "ComponentMap").write(map, (d: typeof map) => {
     return [["Komponente", "Pfade"]].concat(d.map(e => [e.component, e.pathList.map(pathFix).join("<br>")]));
 });
 
@@ -55,8 +55,12 @@ const notMapped = project.fileCollection.reduce((prev, curr) => {
     }
 }, [] as string[] );
 
-writerBuilder.build("not-mapped").write(notMapped, (d: typeof notMapped) => {
+writerBuilder.build("html-table", "NotMapped").write(notMapped, (d: typeof notMapped) => {
     return d.map(e => [e]);
+});
+
+writerBuilder.build("tex-table", "ComponentMap").write(map, (d: typeof map) => {
+    return [["Komponente", "Pfade"]].concat(d.map(e => [e.component, e.pathList.map(pathFix).join(" \\\\\n & & ")]));
 });
 
 // console.log(project.fileCollection)

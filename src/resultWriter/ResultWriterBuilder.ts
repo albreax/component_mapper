@@ -1,5 +1,6 @@
 import { ResultHTMLTableWriter } from "./ResultHTMLTableWriter.ts";
 import { ResultJsonWriter } from "./ResultJsonWriter.ts";
+import { ResultTexTableWriter } from "./ResultTexTableWriter.ts";
 import { IResultWriter } from "./IResultWriter.ts";
 export class ResultWriterBuilder{
     private resultTargetDataDir: string;
@@ -14,17 +15,16 @@ export class ResultWriterBuilder{
     }
 
     public build : <D, T>(
-        type: "html-table" | "json" | "component-map" | "not-mapped"
-    ) => IResultWriter<D, T> = (type) => {
+        type: "html-table" | "json" | "tex-table",
+        fileName: string,
+    ) => IResultWriter<D, T> = (type, fileName) => {
         switch(type) {
             case "html-table":
-                return new ResultHTMLTableWriter(this.resultTargetDir, "HTMLTable.html");
-            case "component-map": 
-                return new ResultHTMLTableWriter(this.resultTargetDir, "ComponentMap.html");
-            case "not-mapped":
-                return new ResultHTMLTableWriter(this.resultTargetDir, "NotMapped.html");
+                return new ResultHTMLTableWriter(this.resultTargetDir, fileName);
             case "json":
-                return new ResultJsonWriter(this.resultTargetDataDir);
+                return new ResultJsonWriter(this.resultTargetDataDir, fileName);
+            case "tex-table":
+                return new ResultTexTableWriter(this.resultTargetDataDir, fileName);
             default: ((t: never) => {
                 throw `missing case for type $${t}`;
             })(type);
