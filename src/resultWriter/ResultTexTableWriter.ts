@@ -9,7 +9,7 @@ export class ResultTexTableWriter<D, T extends  string[][]> implements IResultWr
         const title =  " & " + titleData?.map(e => "\\textbf{"+ e +"}").join(" & ") + " \\\\";
 
         const content =  mapped.map((row, indx) => {
-            return indx + " & " + row.join(" & ") + " \\\\\n\\hline \n" 
+            return "\\rownumber & " + row.join(" & ") + " \\\\\n\\hline \n" 
         }).join("")
 
         const textData = "\\begin{tabular}{" + "r" + titleData?.map(() => "l").join("") +"}\n"
